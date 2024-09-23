@@ -1,7 +1,16 @@
+import os
+from PIL import Image
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
 import torch.optim as optim
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import jaccard_score, f1_score
+from skimage.transform import resize
 from net import *
-from nail2 import *
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet().to(device)
 criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
@@ -11,11 +20,11 @@ for epoch in range(num_epochs):
     model.train()
     running_loss = 0.0
     for images, labels in train_loader:
-        images, labels = images.to(device), labels.to(device)
+        images = images.to(device)
+        labels = labels.squeeze(1).to(device)
 
         optimizer.zero_grad()
         outputs = model(images)
-        labels = labels.squeeze(1)
         loss = criterion(outputs.squeeze(1), labels)
         loss.backward()
         optimizer.step()
