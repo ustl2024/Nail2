@@ -1,9 +1,15 @@
 import os
 from PIL import Image
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
-
+import torch.optim as optim
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import jaccard_score, f1_score
+from skimage.transform import resize
 
 class NailDataset(Dataset):
     def __init__(self, image_dir, label_dir, transform=None):
@@ -39,6 +45,10 @@ class NailDataset(Dataset):
         return image, label
 
 
+# Check if CUDA is available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
 # Define the transforms
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
@@ -46,5 +56,6 @@ transform = transforms.Compose([
 ])
 
 # Create datasets and dataloaders
-train_dataset = NailDataset(r'D:\pythonProject\T3\archive\images',  r'D:\pythonProject\T3\archive\labels', transform=transform)
+train_dataset = NailDataset(r'D:\pythonProject\T3\archive\images', r'D:\pythonProject\T3\archive\labels',
+                            transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
