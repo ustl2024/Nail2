@@ -1,10 +1,18 @@
-from net import *
-from nail2 import *
-from train import *
+import os
+from PIL import Image
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+import torch.optim as optim
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import jaccard_score, f1_score
 from skimage.transform import resize
+from net import *
+from train import *
+
 def predict(model, image_path):
     model.eval()
     image = Image.open(image_path).convert('RGB')
@@ -14,6 +22,7 @@ def predict(model, image_path):
         output = torch.sigmoid(output).cpu().squeeze().numpy()
     return output
 
+
 def compute_metrics(pred, gt):
     pred = (pred > 0.5).astype(np.uint8)
     gt = (gt > 0.5).astype(np.uint8)
@@ -21,14 +30,14 @@ def compute_metrics(pred, gt):
     dice = f1_score(gt.flatten(), pred.flatten(), average='binary')
     return iou, dice
 
-test_image_path = r'D:\pythonProject\T3\archive\nails_segmentation\images\7e9f5818-4425-4d8a-808a-4673d96fa250.jpg'
-gt_image_path = r'D:\pythonProject\T3\archive\nails_segmentation\labels\7e9f5818-4425-4d8a-808a-4673d96fa250.jpg'
+
+test_image_path = r'D:\pythonProject\T3\archive\images\7e9f5818-4425-4d8a-808a-4673d96fa250.jpg'
+gt_image_path = r'D:\pythonProject\T3\archive\labels\7e9f5818-4425-4d8a-808a-4673d96fa250.jpg'
 prediction = predict(model, test_image_path)
 
 gt_image = Image.open(gt_image_path).convert('L')
 gt = np.array(gt_image)
 gt = resize(gt, prediction.shape, mode='constant', preserve_range=True)
-
 
 iou, dice = compute_metrics(prediction, gt)
 print(f"IOU: {iou:.4f}, Dice: {dice:.4f}")
